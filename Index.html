@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELITE SECURITY DATABASE v8.0</title>
+    <style>
+        /* ===== BASE STYLES ===== */
+        body {
+            background-color: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* Scanline effect */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(rgba(0, 255, 0, 0.05) 0%, 
+                transparent 5%);
+            background-size: 100% 5px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* ===== NAVIGATION MENU ===== */
+        .menu-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: #0f0;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: rgba(0, 20, 0, 0.9);
+            border: 1px solid #0f0;
+            min-width: 200px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .dropdown-menu a {
+            color: #0f0;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-menu a:hover {
+            background: rgba(0, 50, 0, 0.5);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .container {
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        /* ===== TERMINAL INTERFACE ===== */
+        .terminal-header {
+            border-bottom: 1px dashed #0f0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .prompt {
+            color: #0f0;
+            margin: 15px 0;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .prompt::before {
+            content: ">";
+            position: absolute;
+            left: 10px;
+            color: #0f0;
+            animation: blink 1s infinite;
+        }
+
+        .status-display {
+            border: 1px dashed #0f0;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.2em;
+            animation: pulse 2s infinite;
+        }
+
+        /* ===== PUZZLE PAGES ===== */
+        .puzzle-page {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 25px;
+            border: 2px solid #0f0;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+            width: 80%;
+            max-width: 600px;
+            z-index: 1000;
+        }
+
+        /* ===== MAIN SYSTEM ===== */
+        #mainSystem {
+            display: none;
+        }
+
+        .system-header {
+            border-bottom: 1px dashed #0f0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar {
+            margin: 20px 0;
+            display: flex;
+        }
+
+        .search-bar input {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        /* ===== AGENT TABLE ===== */
+        .agent-table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 20px 0;
+            border: 1px solid #0f0;
+        }
+
+        .agent-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .agent-table th {
+            position: sticky;
+            top: 0;
+            background: #000;
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px dashed #0f0;
+        }
+
+        .agent-table td {
+            padding: 10px;
+            border-bottom: 1px dotted rgba(0, 255, 0, 0.2);
+        }
+
+        /* ===== NID CARD STYLES ===== */
+        .nid-card {
+            display: none;
+            width: 350px;
+            margin: 30px auto;
+            padding: 20px;
+            background: rgba(0, 20, 0, 0.2);
+            border: 2px solid #0f0;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            position: relative;
+        }
+
+        .nid-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(135deg, transparent 45%, rgba(0,255,0,0.1) 50%, transparent 55%);
+            pointer-events: none;
+        }
+
+        .nid-header {
+            text-align: center;
+            border-bottom: 1px dashed #0f0;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .nid-photo {
+            width: 100px;
+            height: 120px;
+            margin: 10px auto;
+            border: 1px solid #0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 30, 0, 0.3);
+        }
+
+        .nid-row {
+            display: flex;
+            margin: 8px 0;
+            padding-bottom: 5px;
+            border-bottom: 1px dotted rgba(0, 255, 0, 0.3);
+        }
+
+        .nid-label {
+            width: 120px;
+            font-weight: bold;
+            color: #0ff;
+        }
+
+        .nid-value {
+            flex: 1;
+        }
+
+        .hidden-data {
+            color: transparent;
+            text-shadow: 0 0 8px #0f0;
+            transition: all 0.3s;
+        }
+
+        .hidden-data.revealed {
+            color: #0f0;
+            text-shadow: none;
+        }
+
+        /* ===== ADMIN PANEL ===== */
+        .admin-panel {
+            display: none;
+            margin-top: 30px;
+            border: 1px dashed #0f0;
+            padding: 20px;
+        }
+
+        .admin-section {
+            margin-bottom: 20px;
+        }
+
+        /* ===== PASSWORD PROMPTS ===== */
+        .password-prompt {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 25px;
+            border: 2px solid #0f0;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+            z-index: 2000;
+            width: 300px;
+            text-align: center;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; text-shadow: 0 0 5px #0f0; }
+            50% { opacity: 1; text-shadow: 0 0 15px #0f0; }
+        }
+
+        /* ===== BUTTONS & INPUTS ===== */
+        button {
+            background: rgba(0, 30, 0, 0.3);
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 8px 15px;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: rgba(0, 50, 0, 0.5);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        input, textarea, select {
+            background: rgba(0, 20, 0, 0.3);
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 8px;
+            font-family: 'Courier New', monospace;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        textarea {
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== NAVIGATION MENU ===== -->
+    <div class="menu-container">
+        <button class="menu-btn" onclick="toggleMenu()">⋮</button>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a href="#" onclick="showHome()">Home</a>
+            <a href="#" onclick="showAdminPanel()">Admin</a>
+            <a href="#" onclick="showPasswordManager()">Password Manager</a>
+            <a href="#" onclick="showAbout()">About Us</a>
+        </div>
+    </div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="container" id="mainContent">
+        <!-- ===== TERMINAL INTERFACE ===== -->
+        <div class="terminal-header">
+            <div class="prompt">ELITE SECURITY DATABASE v8.0</div>
+            <div class="prompt">COGNITIVE SECURITY PROTOCOL ACTIVE</div>
+            <div class="prompt">INITIALIZING...</div>
+        </div>
+
+        <div class="status-display">
+            ACCESS STATUS: <span id="access-status">LOCKED</span>
+        </div>
+
+        <div class="prompt">USER: <span id="user-display">[AGENT_LOADING]</span></div>
+        <div class="prompt">CLEARANCE: <span id="clearance-display">PENDING</span></div>
+        <div class="prompt">LAST ACCESS: <span id="timestamp">[REDACTED]</span></div>
+
+        <button onclick="startPuzzles()" style="margin-top: 20px;">INITIATE AUTHORIZATION SEQUENCE</button>
+
+        <!-- ===== PUZZLE PAGES ===== -->
+        <div id="puzzle1" class="puzzle-page">
+            <h2>SECURITY CHALLENGE 1/7</h2>
+            <div class="prompt" id="puzzle1-question">Find the missing number: 3, 9, 27, 81, ?</div>
+            <input type="text" id="answer1" placeholder="Enter response...">
+            <button onclick="checkAnswer(1)">SUBMIT</button>
+        </div>
+
+        <div id="puzzle2" class="puzzle-page">
+            <h2>SECURITY CHALLENGE 2/7</h2>
+            <div class="prompt" id="puzzle2-question">Decrypt this text (Caesar Cipher Shift 3): "Sxqfdqjvklw"</div>
+            <input type="text" id="answer2" placeholder="Enter decryption...">
+            <button onclick="checkAnswer(2)">SUBMIT</button>
+        </div>
+
+        <div id="puzzle3" class="puzzle-page">
+            <h2>SECURITY CHALLENGE 3/7</h2>
+            <div class="prompt" id="puzzle3-question">What appears once in a minute, twice in a moment, but never in a thousand years?</div>
+            <input type="text" id="answer3" placeholder="Enter answer...">
+            <button onclick="checkAnswer(3)">SUBMIT</button>
+        </div>
+
+        <div id="puzzle4" class="puzzle-page">
+            <h2>SECURITY CHALLENGE 4/7</h2>
+            <div class="prompt" id="puzzle4-question">Binary Challenge: What is 101010 in decimal?</div>
+            <input type="text" id="answer4" placeholder="Enter decimal number...">
+            <button onclick="checkAnswer(4)">SUBMIT</button>
+        </div>
+
+        <div id="puzzle5" class="puzzle-page">
+            <h2>SECURITY CHALLENGE 5/7</h2>
+            <div class="prompt" id="puzzle5-question">Complete the sequence: O, T, T, F, F, S, S, ?</div>
+            <input type="text" id="answer5" placeholder="Enter next letter...">
+            <button onclick="checkAnswer(5)">SUBMIT</button>
+        </div>
+
+        <div id="puzzle6" class="puzzle-page">
+            <h2>SECURITY CHALLENGE 6/7</h2>
+            <div class="prompt" id="puzzle6-question">What is the 7th digit of π (3.141592...)?</div>
+            <input type="text" id="answer6" placeholder="Enter digit...">
+            <button onclick="checkAnswer(6)">SUBMIT</button>
+        </div>
+
+        <div id="puzzle7" class="puzzle-page">
+            <h2>FINAL SECURITY CHALLENGE 7/7</h2>
+            <div class="prompt" id="puzzle7-question">Enter the elite access password:</div>
+            <input type="password" id="answer7" placeholder="Enter password...">
+            <button onclick="checkAnswer(7)">SUBMIT</button>
+        </div>
+
+        <!-- ===== MAIN SYSTEM ===== -->
+        <div id="mainSystem">
+            <div class="system-header">
+                <div class="prompt">ELITE PERSONNEL DATABASE</div>
+                <div class="prompt">ACCESS LEVEL: TOP SECRET</div>
+            </div>
+            
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search agents..." oninput="searchAgents()">
+                <button onclick="searchAgents()">SEARCH</button>
+            </div>
+            
+            <div class="agent-table-container">
+                <table class="agent-table" id="agentTable">
+                    <thead>
+                        <tr>
+                            <th>NAME</th>
+                            <th>ID NUMBER</th>
+                            <th>STATUS</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="agentTableBody">
+                        <!-- Agents will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== ADMIN PANEL ===== -->
+        <div id="adminPanel" class="admin-panel">
+            <h2>ADMINISTRATOR PANEL</h2>
+            <div class="prompt">Requires master password for changes</div>
+            
+            <div class="admin-section">
+                <h3>Puzzle Management</h3>
+                <div id="puzzleAdminContainer">
+                    <!-- Puzzle admin fields will be added here -->
+                </div>
+                <button onclick="savePuzzleChanges()">Save Puzzle Changes</button>
+            </div>
+            
+            <div class="admin-section">
+                <h3>Agent Management</h3>
+                <div class="search-bar">
+                    <input type="text" id="adminSearchInput" placeholder="Search agents..." oninput="adminSearchAgents()">
+                </div>
+                <div class="agent-table-container">
+                    <table class="agent-table" id="adminAgentTable">
+                        <thead>
+                            <tr>
+                                <th>NAME</th>
+                                <th>ID</th>
+                                <th>ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminAgentTableBody">
+                            <!-- Admin agent list will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="agentEditForm" style="display:none;">
+                <h3>Edit Agent</h3>
+                <div id="agentEditFields">
+                    <!-- Agent edit fields will be added here -->
+                </div>
+                <button onclick="saveAgentChanges()">Save Changes</button>
+                <button onclick="cancelEdit()">Cancel</button>
+            </div>
+        </div>
+
+        <!-- ===== PASSWORD MANAGER ===== -->
+        <div id="passwordManager" style="display:none;">
+            <h2>PASSWORD MANAGER</h2>
+            <div class="prompt">System Access Passwords</div>
+            <div class="nid-row">
+                <div class="nid-label">Main System:</div>
+                <div class="nid-value">quantum137</div>
+            </div>
+            <div class="nid-row">
+                <div class="nid-label">Admin Panel:</div>
+                <div class="nid-value">masterkey</div>
+            </div>
+            <div class="nid-row">
+                <div class="nid-label">Agent Data:</div>
+                <div class="nid-value">eliteaccess</div>
+            </div>
+        </div>
+
+        <!-- ===== ABOUT US ===== -->
+        <div id="aboutUs" style="display:none;">
+            <h2>ABOUT ELITE SECURITY SYSTEM</h2>
+            <div class="prompt">v8.0 Secure Database</div>
+            <div class="prompt">Developed for classified operations</div>
+            <div class="prompt">All rights reserved</div>
+        </div>
+    </div>
+
+    <!-- ===== NID CARD TEMPLATE ===== -->
+    <div id="nidTemplate" class="nid-card" style="display:none;">
+        <div class="nid-header">NATIONAL IDENTIFICATION CARD</div>
+        <div class="nid-photo">[SECURED IMAGE]</div>
+        <div class="nid-row">
+            <div class="nid-label">NAME:</div>
+            <div class="nid-value" id="nid-name">-</div>
+        </div>
+        <div class="nid-row">
+            <div class="nid-label">FATHER'S NAME:</div>
+            <div class="nid-value hidden-data" id="nid-father" data-value="">████████</div>
+        </div>
+        <div class="nid-row">
+            <div class="nid-label">MOTHER'S NAME:</div>
+            <div class="nid-value hidden-data" id="nid-mother" data-value="">████████</div>
+        </div>
+        <div class="nid-row">
+            <div class="nid-label">DATE OF BIRTH:</div>
+            <div class="nid-value hidden-data" id="nid-dob" data-value="">████████</div>
+        </div>
+        <div class="nid-row">
+            <div class="nid-label">BLOOD TYPE:</div>
+            <div class="nid-value hidden-data" id="nid-blood" data-value="">████████</div>
+        </div>
+        <div class="nid-row">
+            <div class="nid-label">NATIONALITY:</div>
+            <div class="nid-value hidden-data" id="nid-nationality" data-value="">████████</div>
+        </div>
+        <div class="nid-row">
+            <div class="nid-label">SEX:</div>
+            <div class="nid-value hidden-data" id="nid-sex" data-value="">████████</div>
+        </div>
+        <div class="nid-row">
+            <div class="nid-label">ADDRESS:</div>
+            <div class="nid-value hidden-data" id="nid-address" data-value="">████████</div>
+        </div>
+        <div class="nid-row">
+            <div class="nid-label">CONTACT:</div>
+            <div class="nid-value hidden-data" id="nid-contact" data-value="">████████</div>
+        </div>
+        <div class="nid-row">
+            <div class="nid-label">EMAIL:</div>
+            <div class="nid-value hidden-data" id="nid-email" data-value="">████████</div>
+        </div>
+        <button onclick="revealData()" style="margin-top: 15px;">REVEAL SENSITIVE DATA</button>
+    </div>
+
+    <!-- ===== PASSWORD PROMPTS ===== -->
+    <div id="nidPasswordPrompt" class="password-prompt">
+        <div class="prompt">SENSITIVE DATA ACCESS</div>
+        <div class="prompt">Enter security code for <span id="currentAgentName"></span>:</div>
+        <input type="password" id="nidPassword" placeholder="Enter password...">
+        <div id="nidError" style="color:#f00; display:none;">INVALID CODE</div>
+        <button onclick="checkNidPassword()">AUTHENTICATE</button>
+        <button onclick="closeNidPrompt()">CANCEL</button>
+    </div>
+
+    <div id="adminPasswordPrompt" class="password-prompt">
+        <div class="prompt">ADMIN ACCESS REQUIRED</div>
+        <div class="prompt">Enter master password:</div>
+        <input type="password" id="adminPassword" placeholder="Enter password...">
+        <div id="adminError" style="color:#f00; display:none;">INVALID PASSWORD</div>
+        <button onclick="verifyAdminAccess()">AUTHENTICATE</button>
+        <button onclick="closeAdminPrompt()">CANCEL</button>
+    </div>
+
+    <script>
+        // ===== SYSTEM CONFIGURATION =====
+        const MASTER_PASSWORD = "masterkey";
+        const SYSTEM_PASSWORD = "quantum137";
+        const AGENT_PASSWORD = "eliteaccess";
+        
+        let score = 0;
+        let currentPuzzle = 1;
+        let currentAgent = null;
+        let currentEditingAgent = null;
+        
+        // Puzzle configuration
+        const puzzles = [
+            {
+                question: "Find the missing number: 3, 9, 27, 81, ?",
+                answer: "243",
+                points: 100
+            },
+            {
+                question: 'Decrypt this text (Caesar Cipher Shift 3): "Sxqfdqjvklw"',
+                answer: "password",
+                points: 100
+            },
+            {
+                question: "What appears once in a minute, twice in a moment, but never in a thousand years?",
+                answer: "m",
+                points: 100
+            },
+            {
+                question: "Binary Challenge: What is 101010 in decimal?",
+                answer: "42",
+                points: 100
+            },
+            {
+                question: "Complete the sequence: O, T, T, F, F, S, S, ?",
+                answer: "e",
+                points: 100
+            },
+            {
+                question: "What is the 7th digit of π (3.141592...)?",
+                answer: "6",
+                points: 100
+            },
+            {
+                question: "Enter the elite access password:",
+                answer: SYSTEM_PASSWORD,
+                points: 100
+            }
+        ];
+        
+        // Generate 100 random agents
+        const agents = [];
+        const firstNames = ["James", "John", "Robert", "Michael", "William", "David", "Richard", "Joseph", "Thomas", "Daniel", 
+                          "Emma", "Olivia", "Ava", "Isabella", "Sophia", "Charlotte", "Mia", "Amelia", "Harper", "Evelyn"];
+        const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez",
+                         "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson"];
+        const nationalities = ["US", "UK", "Canada", "Australia", "Germany", "France", "Japan", "China", "Russia", "Brazil"];
+        const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+        
+        for (let i = 0; i < 100; i++) {
+            const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+            const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+            const fatherName = firstNames[Math.floor(Math.random() * firstNames.length)] + " " + lastName;
+            const motherName = firstNames[Math.floor(Math.random() * firstNames.length)] + " " + lastNames[Math.floor(Math.random() * lastNames.length)];
+            
+            agents.push({
+                id: `ID-${Math.floor(1000 + Math.random() * 9000)}-${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`,
+                firstName,
+                lastName,
+                fatherName,
+                motherName,
+                dob: `${Math.floor(1 + Math.random() * 12)}/${Math.floor(1 + Math.random() * 28)}/${Math.floor(1950 + Math.random() * 50)}`,
+                blood: bloodTypes[Math.floor(Math.random() * bloodTypes.length)],
+                nationality: nationalities[Math.floor(Math.random() * nationalities.length)],
+                sex: Math.random() > 0.5 ? "Male" : "Female",
+                address: `${Math.floor(100 + Math.random() * 900)} ${lastName} St, City ${Math.floor(1 + Math.random() * 50)}`,
+                contact: `+1${Math.floor(200 + Math.random() * 800)}${Math.floor(100 + Math.random() * 900)}${Math.floor(1000 + Math.random() * 9000)}`,
+                email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@elite.org`,
+                status: Math.random() > 0.2 ? "ACTIVE" : "INACTIVE"
+            });
+        }
+        
+        // Initialize system
+        document.getElementById('timestamp').textContent = new Date().toLocaleString();
+        document.getElementById('user-display').textContent = "AGENT_" + Math.floor(Math.random() * 9000 + 1000);
+        initializePuzzleAdmin();
+        
+        // ===== NAVIGATION FUNCTIONS =====
+        function toggleMenu() {
+            const menu = document.getElementById("dropdownMenu");
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        }
+        
+        function showHome() {
+            document.getElementById("mainSystem").style.display = "none";
+            document.getElementById("adminPanel").style.display = "none";
+            document.getElementById("passwordManager").style.display = "none";
+            document.getElementById("aboutUs").style.display = "none";
+            toggleMenu();
+        }
+        
+        function showAdminPanel() {
+            document.getElementById("adminPasswordPrompt").style.display = "block";
+            toggleMenu();
+        }
+        
+        function showPasswordManager() {
+            document.getElementById("mainSystem").style.display = "none";
+            document.getElementById("adminPanel").style.display = "none";
+            document.getElementById("passwordManager").style.display = "block";
+            document.getElementById("aboutUs").style.display = "none";
+            toggleMenu();
+        }
+        
+        function showAbout() {
+            document.getElementById("mainSystem").style.display = "none";
+            document.getElementById("adminPanel").style.display = "none";
+            document.getElementById("passwordManager").style.display = "none";
+            document.getElementById("aboutUs").style.display = "block";
+            toggleMenu();
+        }
+        
+        // ===== PUZZLE FUNCTIONS =====
+        function startPuzzles() {
+            document.getElementById("puzzle1").style.display = "block";
+            document.getElementById("clearance-display").textContent = "LEVEL 1";
+            document.getElementById("access-status").textContent = "AUTHENTICATING";
+        }
+        
+        function checkAnswer(puzzleNum) {
+            const answer = document.getElementById(`answer${puzzleNum}`).value.toLowerCase();
+            const puzzle = puzzles[puzzleNum - 1];
+            
+            if (answer === puzzle.answer.toLowerCase()) {
+                // Correct answer
+                document.getElementById(`puzzle${puzzleNum}`).style.display = "none";
+                score += puzzle.points;
+                
+                if (puzzleNum < 7) {
+                    // Show next puzzle
+                    currentPuzzle++;
+                    document.getElementById(`puzzle${currentPuzzle}`).style.display = "block";
+                    document.getElementById("clearance-display").textContent = `LEVEL ${currentPuzzle}`;
+                    document.getElementById(`answer${currentPuzzle}`).focus();
+                } else {
+                    // All puzzles completed
+                    document.getElementById("access-status").textContent = "ACCESS GRANTED";
+                    document.getElementById("mainSystem").style.display = "block";
+                    populateAgentTable();
+                }
+            } else {
+                alert("ACCESS DENIED\nInvalid response");
+            }
+        }
+        
+        // ===== AGENT TABLE FUNCTIONS =====
+        function populateAgentTable(filter = "") {
+            const tableBody = document.getElementById("agentTableBody");
+            tableBody.innerHTML = "";
+            
+            const filteredAgents = agents.filter(agent => 
+                `${agent.firstName} ${agent.lastName}`.toLowerCase().includes(filter.toLowerCase()) ||
+                agent.id.toLowerCase().includes(filter.toLowerCase())
+            );
+            
+            filteredAgents.forEach(agent => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${agent.lastName}, ${agent.firstName}</td>
+                    <td>${agent.id}</td>
+                    <td style="color:${agent.status === 'ACTIVE' ? '#0f0' : '#f00'}">${agent.status}</td>
+                    <td><button onclick="viewNidCard('${agent.id}')">VIEW NID</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function searchAgents() {
+            const searchTerm = document.getElementById("searchInput").value;
+            populateAgentTable(searchTerm);
+        }
+        
+        // ===== NID CARD FUNCTIONS =====
+        function viewNidCard(agentId) {
+            currentAgent = agents.find(a => a.id === agentId);
+            if (!currentAgent) return;
+            
+            // Clone the template
+            const nidCard = document.getElementById("nidTemplate").cloneNode(true);
+            nidCard.id = "currentNidCard";
+            nidCard.style.display = "block";
+            
+            // Populate data
+            document.getElementById("nid-name").textContent = `${currentAgent.lastName}, ${currentAgent.firstName}`;
+            document.getElementById("nid-father").dataset.value = currentAgent.fatherName;
+            document.getElementById("nid-mother").dataset.value = currentAgent.motherName;
+            document.getElementById("nid-dob").dataset.value = currentAgent.dob;
+            document.getElementById("nid-blood").dataset.value = currentAgent.blood;
+            document.getElementById("nid-nationality").dataset.value = currentAgent.nationality;
+            document.getElementById("nid-sex").dataset.value = currentAgent.sex;
+            document.getElementById("nid-address").dataset.value = currentAgent.address;
+            document.getElementById("nid-contact").dataset.value = currentAgent.contact;
+            document.getElementById("nid-email").dataset.value = currentAgent.email;
+            
+            // Remove any existing card and add new one
+            const oldCard = document.getElementById("currentNidCard");
+            if (oldCard) oldCard.remove();
+            document.body.appendChild(nidCard);
+            
+            // Scroll to card
+            nidCard.scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+        
+        function revealData() {
+            document.getElementById("currentAgentName").textContent = `${currentAgent.firstName} ${currentAgent.lastName}`;
+            document.getElementById("nidPasswordPrompt").style.display = "block";
+            document.getElementById("nidPassword").focus();
+        }
+        
+        function checkNidPassword() {
+            const enteredPassword = document.getElementById("nidPassword").value;
+            
+            if (enteredPassword === AGENT_PASSWORD) {
+                // Reveal all hidden data
+                const card = document.getElementById("currentNidCard");
+                card.querySelectorAll('.hidden-data').forEach(item => {
+                    item.classList.add("revealed");
+                    item.textContent = item.dataset.value;
+                });
+                closeNidPrompt();
+            } else {
+                document.getElementById("nidError").style.display = "block";
+                document.getElementById("nidPassword").value = "";
+            }
+        }
+        
+        function closeNidPrompt() {
+            document.getElementById("nidPasswordPrompt").style.display = "none";
+            document.getElementById("nidPassword").value = "";
+            document.getElementById("nidError").style.display = "none";
+        }
+        
+        // ===== ADMIN FUNCTIONS =====
+        function initializePuzzleAdmin() {
+            const container = document.getElementById("puzzleAdminContainer");
+            container.innerHTML = "";
+            
+            puzzles.forEach((puzzle, index) => {
+                const puzzleDiv = document.createElement("div");
+                puzzleDiv.className = "admin-puzzle";
+                puzzleDiv.innerHTML = `
+                    <h4>Puzzle ${index + 1}</h4>
+                    <label>Question:</label>
+                    <textarea id="puzzle${index}-question">${puzzle.question}</textarea>
+                    <label>Answer:</label>
+                    <input type="text" id="puzzle${index}-answer" value="${puzzle.answer}">
+                    <label>Points:</label>
+                    <input type="number" id="puzzle${index}-points" value="${puzzle.points}">
+                `;
+                container.appendChild(puzzleDiv);
+            });
+        }
+        
+        function verifyAdminAccess() {
+            const enteredPassword = document.getElementById("adminPassword").value;
+            
+            if (enteredPassword === MASTER_PASSWORD) {
+                closeAdminPrompt();
+                document.getElementById("mainSystem").style.display = "none";
+                document.getElementById("adminPanel").style.display = "block";
+                document.getElementById("passwordManager").style.display = "none";
+                document.getElementById("aboutUs").style.display = "none";
+                populateAdminAgentTable();
+            } else {
+                document.getElementById("adminError").style.display = "block";
+                document.getElementById("adminPassword").value = "";
+            }
+        }
+        
+        function closeAdminPrompt() {
+            document.getElementById("adminPasswordPrompt").style.display = "none";
+            document.getElementById("adminPassword").value = "";
+            document.getElementById("adminError").style.display = "none";
+        }
+        
+        function populateAdminAgentTable(filter = "") {
+            const tableBody = document.getElementById("adminAgentTableBody");
+            tableBody.innerHTML = "";
+            
+            const filteredAgents = agents.filter(agent => 
+                `${agent.firstName} ${agent.lastName}`.toLowerCase().includes(filter.toLowerCase()) ||
+                agent.id.toLowerCase().includes(filter.toLowerCase())
+            );
+            
+            filteredAgents.forEach(agent => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${agent.lastName}, ${agent.firstName}</td>
+                    <td>${agent.id}</td>
+                    <td><button onclick="editAgent('${agent.id}')">EDIT</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function adminSearchAgents() {
+            const searchTerm = document.getElementById("adminSearchInput").value;
+            populateAdminAgentTable(searchTerm);
+        }
+        
+        function editAgent(agentId) {
+            currentEditingAgent = agents.find(a => a.id === agentId);
+            if (!currentEditingAgent) return;
+            
+            const form = document.getElementById("agentEditForm");
+            const fields = document.getElementById("agentEditFields");
+            fields.innerHTML = "";
+            
+            // Create editable fields for each property
+            for (const key in currentEditingAgent) {
+                if (key === "id") continue;
+                
+                const label = document.createElement("label");
+                label.textContent = `${key.toUpperCase()}:`;
+                fields.appendChild(label);
+                
+                if (key === "status") {
+                    const select = document.createElement("select");
+                    select.id = `edit-${key}`;
+                    select.innerHTML = `
+                        <option value="ACTIVE" ${currentEditingAgent[key] === "ACTIVE" ? "selected" : ""}>ACTIVE</option>
+                        <option value="INACTIVE" ${currentEditingAgent[key] === "INACTIVE" ? "selected" : ""}>INACTIVE</option>
+                    `;
+                    fields.appendChild(select);
+                } else {
+                    const input = document.createElement("input");
+                    input.type = "text";
+                    input.id = `edit-${key}`;
+                    input.value = currentEditingAgent[key];
+                    fields.appendChild(input);
+                }
+            }
+            
+            document.getElementById("adminAgentTable").style.display = "none";
+            form.style.display = "block";
+        }
+        
+        function saveAgentChanges() {
+            if (!currentEditingAgent) return;
+            
+            // Update agent data from form
+            for (const key in currentEditingAgent) {
+                if (key === "id") continue;
+                
+                const input = document.getElementById(`edit-${key}`);
+                if (input) {
+                    currentEditingAgent[key] = input.value;
+                }
+            }
+            
+            // Refresh tables
+            populateAgentTable();
+            populateAdminAgentTable();
+            
+            // Return to agent list
+            document.getElementById("adminAgentTable").style.display = "table";
+            document.getElementById("agentEditForm").style.display = "none";
+            currentEditingAgent = null;
+        }
+        
+        function cancelEdit() {
+            document.getElementById("adminAgentTable").style.display = "table";
+            document.getElementById("agentEditForm").style.display = "none";
+            currentEditingAgent = null;
+        }
+        
+        function savePuzzleChanges() {
+            puzzles.forEach((puzzle, index) => {
+                puzzle.question = document.getElementById(`puzzle${index}-question`).value;
+                puzzle.answer = document.getElementById(`puzzle${index}-answer`).value;
+                puzzle.points = parseInt(document.getElementById(`puzzle${index}-points`).value);
+                
+                // Update puzzle display text if currently showing
+                const puzzleElement = document.getElementById(`puzzle${index + 1}-question`);
+                if (puzzleElement) {
+                    puzzleElement.textContent = puzzle.question;
+                }
+            });
+            
+            alert("Puzzle changes saved!");
+        }
+        
+        // Close NID card when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.nid-card') && !event.target.closest('.agent-table button')) {
+                const card = document.getElementById("currentNidCard");
+                if (card) card.remove();
+            }
+            
+            if (!event.target.closest('.menu-btn') && !event.target.closest('.dropdown-menu')) {
+                document.getElementById("dropdownMenu").style.display = "none";
+            }
+        });
+    </script>
+</body>
+</html>
